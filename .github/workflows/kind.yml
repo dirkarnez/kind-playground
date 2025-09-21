@@ -30,13 +30,6 @@ jobs:
           sudo chmod -R +x . && \
           ./devtunnel user login -g -d
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          
-      - run: |
-          npm i -g concurrently
-
       - uses: actions/checkout@v4
         with:
           repository: actions/upload-artifact
@@ -56,8 +49,8 @@ jobs:
       - run: |
           kind create cluster --name my-kind-cluster
 
-      - run: |
-          nohup ./devtunnel host -p 37367 --allow-anonymous --protocol auto &
+      # - run: |
+      #     nohup ./devtunnel host -p 37367 --allow-anonymous --protocol auto &
 
       - uses: fastai/workflows/ssh@master
         with:
