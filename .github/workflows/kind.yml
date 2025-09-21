@@ -22,6 +22,20 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
+      
+      - run: |
+          curl https://aka.ms/TunnelsCliDownload/linux-x64 -L -J --output devtunnel
+
+      - run: |
+          sudo chmod -R +x . && \
+          ./devtunnel user login -g -d
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - run: |
+          npm i -g concurrently
 
       - uses: actions/checkout@v4
         with:
@@ -31,7 +45,8 @@ jobs:
           submodules: true
 
       - working-directory: 'upload-artifact'
-        run: npm i
+        run: |
+          npm i
       
       - run: |
           curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-amd64 && \
@@ -40,6 +55,9 @@ jobs:
           
       - run: |
           kind create cluster --name my-kind-cluster
+
+      - run: |
+          nohup ./devtunnel host -p 37367 --allow-anonymous --protocol auto &
 
       - uses: fastai/workflows/ssh@master
         with:
