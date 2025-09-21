@@ -1,0 +1,48 @@
+name: CI
+
+on: 
+  workflow_dispatch:
+  
+defaults:
+  run:
+    shell: bash
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    env:
+      INPUT_INCLUDE-HIDDEN-FILES: true
+      INPUT_NAME: files
+      INPUT_OVERWRITE: true
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: actions/upload-artifact
+          ref: v4.5.0
+          path: 'upload-artifact'
+          submodules: true
+
+      - working-directory: 'upload-artifact'
+        run: npm i
+      
+      - run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-amd64 && \
+          sudo chmod +x ./kind && \
+          sudo mv ./kind /usr/local/bin/kind
+
+      - uses: fastai/workflows/ssh@master
+        with:
+          ssh_key: ${{ secrets.SSH_KEY }}
+          key_file: id_ecdsa
+  #     - uses: actions/checkout@v2
+  #     - run: source script-linux.sh
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@master
